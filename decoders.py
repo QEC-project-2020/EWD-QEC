@@ -758,6 +758,7 @@ if __name__ == '__main__':
     from src.toric_model import Toric_code
     from src.planar_model import Planar_code
     from src.xzzx_model import xzzx_code
+    from src.xyz2_model import xyz_code
     import time
 
 

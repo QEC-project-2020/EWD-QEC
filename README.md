@@ -5,6 +5,9 @@ Contains source code for https://arxiv.org/abs/2112.01977
 High accuracy decoding scheme based on minimal information about shortest chain weights.
 
 Karl Hammar, Alexei Orekhov, Patrik Wallin Hybelius, Anna Katariina Wisakanto, Basudha Srivastava, Anton Frisk Kockum, Mats Granath
+
+Contains source code for https://arxiv.org/abs/2112.06036, "The XYZ<sup>2</sup> hexagonal stabilizer code", Basudha Srivastava, Anton Frisk Kockum, Mats Granath
+
 ## Prerequisites 
 - Python 3
 - (optional) *venv* or other environment manager
@@ -50,7 +53,8 @@ File | Description
 `·   ├── planar_model.py` | Implementation of the planar code.
 `·   ├── rotated_surface_model.py` | Implementation of the rotated surface code.
 `·   ├── toric_model.py` | Implementation of the toric code.
-`·   └── xzzx_model.py` | Implementation of the XZZX code.
+`·   ├── xzzx_model.py` | Implementation of the XZZX code.
+`·   └── xyz2_model.py` | Implementation of the XYZ<sup>2</sup> code.
 `├── decoders.py` | Implementation of the EWD decoder among others.
 `├── generate_data.py` | Data generation script.
 `├── LICENCE` | Licene for this project.

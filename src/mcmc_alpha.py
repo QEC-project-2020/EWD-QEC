@@ -8,6 +8,7 @@ from src.xzzx_model import xzzx_code, _apply_random_stabilizer as apply_stabiliz
 from src.rotated_surface_model import RotSurCode, _apply_random_stabilizer as apply_stabilizer_fast_rotated
 from src.planar_model import Planar_code, _apply_random_stabilizer as apply_stabilizer_fast_planar
 from src.toric_model import Toric_code, _apply_random_stabilizer as apply_stabilizer_fast_toric
+from src.xyz2_model import xyz_code, _apply_random_stabilizer as apply_stabilizer_fast_xyzxyz
 
 class Chain_alpha:
     def __init__(self, code, pz_tilde, alpha):
@@ -47,6 +48,8 @@ class Chain_alpha:
             self.code.qubit_matrix = _update_chain_fast_planar(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters)
         elif isinstance(self.code, Toric_code):
             self.code.qubit_matrix = _update_chain_fast_toric(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters)
+        elif isinstance(self.code, xyz_code):
+            self.code.qubit_matrix = _update_chain_fast_xyzxyz(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters)
         else:
             raise ValueError("Fast chain updates not available for this code")
 
@@ -150,6 +153,17 @@ def _update_chain_fast_toric(qubit_matrix, pz_tilde, alpha, iters):
 
     for _ in range(iters):
         new_matrix, (dx, dy, dz) = apply_stabilizer_fast_toric(qubit_matrix)
+        
+        p = pz_tilde**(dz + alpha*(dx + dy))
+        if p > 1 or rand.random() < p:
+            qubit_matrix = new_matrix
+    return qubit_matrix
+
+@njit(cache=True)
+def _update_chain_fast_xyzxyz(qubit_matrix, pz_tilde, alpha, iters):
+
+    for _ in range(iters):
+        new_matrix, (dx, dy, dz) = apply_stabilizer_fast_xyzxyz(qubit_matrix)
         
         p = pz_tilde**(dz + alpha*(dx + dy))
         if p > 1 or rand.random() < p:

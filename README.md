@@ -42,10 +42,11 @@ The MWPM decoder (and the eMWPM flavour) can be used either as a decoder or as a
 
 ## Simulating the XYZ<sup>2</sup> code
 To reproduce the results in https://arxiv.org/abs/2112.06036, use file ***run.py*** with parameters:
-- code: xyz_code
+- code: xyz2
 - method: EWD
 - noise: biased
 - eta: 0.5 (depolarizing noise) or 10 (biased noise)
+- onlyshortest: False
 
 ## Structure of this repository
 

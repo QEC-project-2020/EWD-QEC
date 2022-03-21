@@ -9,6 +9,7 @@ from src.toric_model import Toric_code
 from src.planar_model import Planar_code
 from src.xzzx_model import xzzx_code
 from src.rotated_surface_model import RotSurCode
+from src.xyz2_model import xyz_code
 
 # decoders
 from decoders import MCMC, single_temp, single_temp_alpha, EWD, \
@@ -92,6 +93,10 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
             assert params['noise'] in ['depolarizing', 'alpha', 'biased'], f'{params["noise"]}-noise is not compatible with "{params["code"]}"-model.'
             init_code = RotSurCode(params['size'])
             init_code.generate_random_error(p_x=p_x, p_y=p_y, p_z=p_z)
+        elif params['code'] == 'xyz2':
+            assert params['noise'] in ['depolarizing', 'alpha', 'biased'], f'{params["noise"]}-noise is not compatible with "{params["code"]}"-model.'
+            init_code = xyz_code(params['size'])
+            init_code.generate_random_error(p_x=p_x, p_y=p_y, p_z=p_z)
  
         # Flatten initial qubit matrix to store in dataframe
         df_qubit = copy.deepcopy(init_code.qubit_matrix)
@@ -162,13 +167,24 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
                 if np.argmax(df_eq_distr) != eq_true:
                     print('Failed syndrom, total now:', failed_syndroms)
                     failed_syndroms += 1
-            
             elif params['noise'] == 'alpha':
                 alpha=params['alpha']
                 p_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
                 pz_tilde_sampling = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde_sampling, 0.5)[0]
                 p_tilde = params['p_error'] / (1 - params['p_error'])
                 pz_tilde = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde, 0.5)[0]
+                df_eq_distr = EWD_alpha(init_code,
+                                         pz_tilde,
+                                         alpha,
+                                         params['steps'],
+                                         pz_tilde_sampling=pz_tilde_sampling,
+                                         onlyshortest=params['onlyshortest'])
+                df_eq_distr = np.array(df_eq_distr)
+            elif params['noise'] == 'biased':
+                p = params['p_error']
+                pz_tilde = p_z / (1 - p)
+                pz_tilde_sampling = pz_tilde
+                alpha = log(p_x/(1-p)) / log(p_z/(1-p))
                 df_eq_distr = EWD_alpha(init_code,
                                          pz_tilde,
                                          alpha,

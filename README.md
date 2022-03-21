@@ -39,6 +39,14 @@ The data is saved in *pandas* DataFrames, where the first row contains a copy of
 
 ### Use of MWPM
 The MWPM decoder (and the eMWPM flavour) can be used either as a decoder or as a tool to find initial chains for other algorithms to use. The MWPM decoder is based on *blossom5* algorithm which is available at https://pub.ist.ac.at/~vnk/software.html (for research purposes only). Download and extract the tarball in the ***src*** directory to use it.
+
+## Simulating the XYZ<sup>2</sup> code
+To reproduce the results in https://arxiv.org/abs/2112.06036, use file ***run.py*** with parameters:
+- code: xyz_code
+- method: EWD
+- noise: biased
+- eta: 0.5 (depolarizing noise) or 10 (biased noise)
+
 ## Structure of this repository
 
 File | Description

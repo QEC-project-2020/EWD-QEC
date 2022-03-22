@@ -183,7 +183,7 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
             elif params['noise'] == 'biased':
                 p = params['p_error']
                 pz_tilde = p_z / (1 - p)
-                pz_tilde_sampling = pz_tilde
+                pz_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
                 alpha = log(p_x/(1-p)) / log(p_z/(1-p))
                 df_eq_distr = EWD_alpha(init_code,
                                          pz_tilde,

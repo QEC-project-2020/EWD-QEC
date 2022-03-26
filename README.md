@@ -2,9 +2,7 @@
 
 Contains source code for https://arxiv.org/abs/2112.01977
 
-High accuracy decoding scheme based on minimal information about shortest chain weights.
-
-Karl Hammar, Alexei Orekhov, Patrik Wallin Hybelius, Anna Katariina Wisakanto, Basudha Srivastava, Anton Frisk Kockum, Mats Granath
+"Error-rate-agnostic decoding of topological stabilizer codes." Karl Hammar, Alexei Orekhov, Patrik Wallin Hybelius, Anna Katariina Wisakanto, Basudha Srivastava, Anton Frisk Kockum, Mats Granath
 
 Contains source code for https://arxiv.org/abs/2112.06036, "The XYZ<sup>2</sup> hexagonal stabilizer code", Basudha Srivastava, Anton Frisk Kockum, Mats Granath
 

@@ -25,19 +25,35 @@ def get_individual_error_rates(params):
     if params['noise'] == 'biased':
         eta = params['eta']
         p = params['p_error']
-        p_z = p * eta / (eta + 1)
-        p_x = p / (2 * (eta + 1))
-        p_y = p_x
+        if params['bias'] == 'Z':
+          p_z = p * eta / (eta + 1)
+          p_x = p / (2 * (eta + 1))
+          p_y = p_x
+        elif params['bias'] == 'X':
+          p_x = p * eta / (eta + 1)
+          p_z = p / (2 * (eta + 1))
+          p_y = p_z
+        elif params['bias'] == 'Y':
+          p_y = p * eta / (eta + 1)
+          p_z = p / (2 * (eta + 1))
+          p_x = p_z
     
     if params['noise'] == 'alpha':
-        # Calculate pz_tilde from p_error (total error prob.)
+        # Calculate p_bias_tilde from p_error (total error prob.)
         p = params['p_error']
         alpha = params['alpha']
         p_tilde = p / (1 - p)
-        pz_tilde = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde, 0.5)[0]
+        p_bias_tilde = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde, 0.5)[0]
         
-        p_z = pz_tilde*(1 - p)
-        p_x = p_y = pz_tilde**alpha * (1 - p)
+        if params['bias'] == 'Z':
+          p_z = p_bias_tilde*(1 - p)
+          p_x = p_y = p_bias_tilde**alpha * (1 - p)
+        elif params['bias'] == 'X':
+          p_x = p_bias_tilde*(1 - p)
+          p_z = p_y = p_bias_tilde**alpha * (1 - p)
+        elif params['bias'] == 'Y':
+          p_y = p_bias_tilde*(1 - p)
+          p_x = p_z = p_bias_tilde**alpha * (1 - p)
         
     if params['noise'] == 'depolarizing':
         p_x = p_y = p_z = params['p_error']/3
@@ -182,15 +198,24 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
                 df_eq_distr = np.array(df_eq_distr)
             elif params['noise'] == 'biased':
                 p = params['p_error']
-                pz_tilde = p_z / (1 - p)
-                pz_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
-                alpha = log(p_x/(1-p)) / log(p_z/(1-p))
+                bias = params['bias']
+                if bias == 'Z':
+                  p_bias_tilde = p_z / (1 - p)
+                  alpha = log(p_x/(1-p)) / log(p_z/(1-p))
+                elif bias == 'X':
+                  p_bias_tilde = p_x / (1 - p)
+                  alpha = log(p_z/(1-p)) / log(p_x/(1-p))
+                elif bias == 'Y':
+                  p_bias_tilde = p_y / (1 - p)
+                  alpha = log(p_x/(1-p)) / log(p_y/(1-p))
+                p_bias_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
                 df_eq_distr = EWD_alpha(init_code,
-                                         pz_tilde,
+                                         p_bias_tilde,
                                          alpha,
                                          params['steps'],
-                                         pz_tilde_sampling=pz_tilde_sampling,
-                                         onlyshortest=params['onlyshortest'])
+                                         p_bias_tilde_sampling=p_bias_tilde_sampling,
+                                         onlyshortest=params['onlyshortest'],
+                                         bias=bias)
                 df_eq_distr = np.array(df_eq_distr)
             else:
                 raise ValueError(f'''EWD does not support "{params['noise']}" noise''')
@@ -314,6 +339,7 @@ if __name__ == '__main__':
             'SEQ': 2,
             'TOPS': 10,
             'eps': 0.01,
+            'bias': 'Z',
             'onlyshortest': only_shortest}
     # Steps is a function of code size L
     params.update({'steps': int(5*params['size']**5)})

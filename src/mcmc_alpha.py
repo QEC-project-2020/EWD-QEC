@@ -11,12 +11,13 @@ from src.toric_model import Toric_code, _apply_random_stabilizer as apply_stabil
 from src.xyz2_model import xyz_code, _apply_random_stabilizer as apply_stabilizer_fast_xyzxyz
 
 class Chain_alpha:
-    def __init__(self, code, pz_tilde, alpha):
+    def __init__(self, code, pz_tilde, alpha, bias='Z'):
         self.code = code
         self.pz_tilde = pz_tilde
         self.alpha = alpha
         self.p_logical = 0
         self.flag = 0
+        self.bias = bias
     
     # runs iters number of steps of the metroplois-hastings algorithm
     def update_chain(self, iters):
@@ -49,7 +50,7 @@ class Chain_alpha:
         elif isinstance(self.code, Toric_code):
             self.code.qubit_matrix = _update_chain_fast_toric(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters)
         elif isinstance(self.code, xyz_code):
-            self.code.qubit_matrix = _update_chain_fast_xyzxyz(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters)
+            self.code.qubit_matrix = _update_chain_fast_xyzxyz(self.code.qubit_matrix, self.pz_tilde, self.alpha, iters, self.bias)
         else:
             raise ValueError("Fast chain updates not available for this code")
 
@@ -160,12 +161,19 @@ def _update_chain_fast_toric(qubit_matrix, pz_tilde, alpha, iters):
     return qubit_matrix
 
 @njit(cache=True)
-def _update_chain_fast_xyzxyz(qubit_matrix, pz_tilde, alpha, iters):
+def _update_chain_fast_xyzxyz(qubit_matrix, pz_tilde, alpha, iters, bias):
 
     for _ in range(iters):
         new_matrix, (dx, dy, dz) = apply_stabilizer_fast_xyzxyz(qubit_matrix)
         
-        p = pz_tilde**(dz + alpha*(dx + dy))
+        if bias == 'Z':
+            d_num = dz + alpha*(dx + dy)
+        elif bias == 'X':
+            d_num = dx + alpha*(dz + dy)
+        elif bias == 'Y':
+            d_num = dy + alpha*(dx + dz)
+        
+        p = pz_tilde**d_num
         if p > 1 or rand.random() < p:
             qubit_matrix = new_matrix
     return qubit_matrix

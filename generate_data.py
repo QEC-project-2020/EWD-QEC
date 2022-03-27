@@ -186,15 +186,16 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
             elif params['noise'] == 'alpha':
                 alpha=params['alpha']
                 p_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
-                pz_tilde_sampling = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde_sampling, 0.5)[0]
+                p_bias_tilde_sampling = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde_sampling, 0.5)[0]
                 p_tilde = params['p_error'] / (1 - params['p_error'])
-                pz_tilde = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde, 0.5)[0]
+                p_bias_tilde = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde, 0.5)[0]
                 df_eq_distr = EWD_alpha(init_code,
-                                         pz_tilde,
+                                         p_bias_tilde,
                                          alpha,
                                          params['steps'],
-                                         pz_tilde_sampling=pz_tilde_sampling,
-                                         onlyshortest=params['onlyshortest'])
+                                         p_bias_tilde_sampling=p_bias_tilde_sampling,
+                                         onlyshortest=params['onlyshortest'],
+                                         bias=bias)
                 df_eq_distr = np.array(df_eq_distr)
             elif params['noise'] == 'biased':
                 p = params['p_error']

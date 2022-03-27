@@ -20,6 +20,7 @@ if __name__ == '__main__':
               'SEQ':            2,
               'TOPS':           10,
               'eps':            0.01,
+              'bias':           'Z',
               'onlyshortest':   True}
     
     # Steps is a function of code size

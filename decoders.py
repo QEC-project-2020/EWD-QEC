@@ -434,7 +434,7 @@ def EWD_general_noise_shortest(init_code, p_xyz, p_sampling=None, droplets=10, s
     return (np.divide(eqdistr, sum(eqdistr)) * 100), (np.divide(eqdistr_shortest, sum(eqdistr_shortest)) * 100)
 
 
-def EWD_droplet_alpha(chain, steps, alpha, onlyshortest):
+def EWD_droplet_alpha(chain, steps, alpha, onlyshortest, bias='Z'):
 
     #chain.code.qubit_matrix = chain.code.apply_stabilizers_uniform()
     # All unique chains will be saved in samples
@@ -447,8 +447,13 @@ def EWD_droplet_alpha(chain, steps, alpha, onlyshortest):
         key = hash(chain.code.qubit_matrix.tobytes())
         if key not in all_seen:
             all_seen.add(key)
-            lengths = chain.code.chain_lengths()
-            eff_len = lengths[2] + alpha * sum(lengths[0:2])
+            (nx, ny, nz) = chain.code.chain_lengths()
+            if bias == 'X':
+                eff_len = nx + alpha * (ny + nz)
+            elif bias == 'Y':
+                eff_len = ny + alpha * (nx + nz)
+            elif bias == 'Z':
+                eff_len = nz + alpha * (nx + ny)
             if onlyshortest:
                 if eff_len < shortest: # New shortest chain
                     shortest = eff_len
@@ -502,34 +507,34 @@ def EWD_alpha_N_n(init_code, pz_tilde, alpha, steps, pz_tilde_sampling=None, onl
     return Nobs_n#(np.divide(eqdistr, sum(eqdistr)) * 100)
 
 
-def EWD_alpha(init_code, pz_tilde, alpha, steps, pz_tilde_sampling=None, onlyshortest=True):
+def EWD_alpha(init_code, p_bias_tilde, alpha, steps, p_bias_tilde_sampling=None, onlyshortest=True, bias='Z'):
 
-    pz_tilde_sampling = pz_tilde_sampling if pz_tilde_sampling is not None else pz_tilde
+    p_bias_tilde_sampling = p_bias_tilde_sampling if p_bias_tilde_sampling is not None else p_bias_tilde
 
     if type(init_code) == list:
         nbr_eq_classes = init_code[0].nbr_eq_classes
         # make sure one init code is provided for each class
         assert len(init_code) == nbr_eq_classes, 'if init_code is a list, it has to contain one code for each class'
-        eq_chains = [Chain_alpha(copy.deepcopy(code), pz_tilde_sampling, alpha) for code in init_code]
+        eq_chains = [Chain_alpha(copy.deepcopy(code), p_bias_tilde_sampling, alpha, bias) for code in init_code]
 
     else:
         nbr_eq_classes = init_code.nbr_eq_classes
         # Create chain with p_sampling, this is allowed since N(n) is independent of p.
         eq_chains = [None] * nbr_eq_classes
         for eq in range(nbr_eq_classes):
-            eq_chains[eq] = Chain_alpha(copy.deepcopy(init_code), pz_tilde_sampling, alpha)
+            eq_chains[eq] = Chain_alpha(copy.deepcopy(init_code), p_bias_tilde_sampling, alpha, bias)
             eq_chains[eq].code.qubit_matrix = eq_chains[eq].code.to_class(eq)
 
     # Z_E will be saved in eqdistr
     eqdistr = np.zeros(nbr_eq_classes)
 
-    beta = - np.log(pz_tilde)
+    beta = - np.log(p_bias_tilde)
 
     for eq in range(nbr_eq_classes):
         # go to class eq and apply stabilizers
         chain = eq_chains[eq]
 
-        out = EWD_droplet_alpha(chain, steps, alpha, onlyshortest)
+        out = EWD_droplet_alpha(chain, steps, alpha, onlyshortest, bias)
 
         for eff_len in out.values():
             eqdistr[eq] += exp(-beta*eff_len)

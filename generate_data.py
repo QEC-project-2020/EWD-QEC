@@ -209,7 +209,8 @@ def generate(file_path, params, nbr_datapoints=10**6, fixed_errors=None):
                 elif bias == 'Y':
                   p_bias_tilde = p_y / (1 - p)
                   alpha = log(p_x/(1-p)) / log(p_y/(1-p))
-                p_bias_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
+                p_tilde_sampling = params['p_sampling'] / (1 - params['p_sampling'])
+                p_bias_tilde_sampling = optimize.fsolve(lambda x: x + 2*x**alpha - p_tilde_sampling, 0.5)[0]
                 df_eq_distr = EWD_alpha(init_code,
                                          p_bias_tilde,
                                          alpha,
